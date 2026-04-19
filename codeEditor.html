@@ -80,27 +80,65 @@
         .btn-outline { background: transparent; border: 2px solid #667eea; color: #667eea; }
         .btn-outline:hover { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
         
-        /* Font Size Controls */
+        /* Beautiful Font Size Controls */
         .font-controls {
             display: flex;
-            gap: 5px;
             align-items: center;
-            background: rgba(255,255,255,0.1);
-            padding: 4px 12px;
-            border-radius: 50px;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 8px;
+            border-radius: 60px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
         }
-        .font-controls button {
-            padding: 4px 12px;
-            font-size: 16px;
+        .font-btn {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(102, 126, 234, 0.2);
+            font-size: 18px;
             font-weight: bold;
-            background: rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
         }
-        .font-controls button:hover { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .font-size-value {
-            color: white;
-            font-size: 12px;
-            min-width: 45px;
+        .font-btn:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: scale(1.05);
+        }
+        .font-btn:active {
+            transform: scale(0.95);
+        }
+        .font-size-display {
+            min-width: 55px;
             text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 4px 10px;
+            border-radius: 30px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+        .font-reset-btn {
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .font-reset-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(180deg);
+        }
+        .font-controls-divider {
+            width: 1px;
+            height: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 0 4px;
         }
         
         .status-area { display: flex; gap: 15px; align-items: center; }
@@ -111,6 +149,10 @@
             padding: 8px 15px;
             border-radius: 50px;
             cursor: pointer;
+            transition: all 0.3s;
+        }
+        .language-selector:hover {
+            background: rgba(255,255,255,0.2);
         }
         .status { color: #4ec9b0; font-size: 12px; padding: 5px 12px; background: rgba(78,201,176,0.1); border-radius: 50px; }
         .main-content { display: flex; flex: 1; overflow: hidden; }
@@ -120,7 +162,17 @@
             border-right: 1px solid rgba(255,255,255,0.1);
             overflow-y: auto;
         }
-        .sidebar-header { padding: 20px; color: #fff; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-header { 
+            padding: 20px; 
+            color: #fff; 
+            font-size: 12px; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
         .file-list { list-style: none; padding: 10px; }
         .file-list li {
             padding: 12px 15px;
@@ -132,12 +184,32 @@
             align-items: center;
             border-radius: 12px;
             transition: all 0.3s;
+            position: relative;
         }
         .file-list li:hover { background: rgba(102,126,234,0.1); transform: translateX(5px); }
         .file-list li.active { background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%); color: white; transform: translateX(5px); }
         .file-name { flex: 1; display: flex; align-items: center; gap: 10px; }
-        .delete-file { background: rgba(255,68,68,0.2); color: #ff6666; padding: 4px 10px; border-radius: 8px; }
-        .delete-file:hover { background: #ff4444; color: white; }
+        .file-actions {
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .file-list li:hover .file-actions {
+            opacity: 1;
+        }
+        .rename-file, .delete-file {
+            background: rgba(255,255,255,0.1);
+            color: #ccc;
+            padding: 4px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+            border: none;
+        }
+        .rename-file:hover { background: #4ec9b0; color: white; transform: scale(1.05); }
+        .delete-file:hover { background: #ff4444; color: white; transform: scale(1.05); }
         .editor-area { flex: 1; display: flex; flex-direction: column; }
         .editor-header {
             padding: 15px 25px;
@@ -146,6 +218,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         .current-file-badge { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 4px 12px; border-radius: 50px; font-size: 11px; }
         .editor-stats { display: flex; gap: 20px; color: #858585; font-size: 12px; }
@@ -155,31 +229,112 @@
         ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
         ::-webkit-scrollbar-thumb { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; }
         
-        /* Font size indicator */
+        /* Beautiful Font Size Indicator */
         .font-size-indicator {
             position: fixed;
             bottom: 30px;
-            left: 30px;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(10px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            backdrop-filter: blur(20px);
             color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
+            padding: 10px 24px;
+            border-radius: 60px;
+            font-size: 14px;
+            font-weight: 600;
             z-index: 1000;
             pointer-events: none;
             opacity: 0;
-            transition: opacity 0.3s;
+            transition: opacity 0.3s, transform 0.2s;
             font-family: monospace;
+            letter-spacing: 0.5px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+            white-space: nowrap;
         }
         .font-size-indicator.show {
             opacity: 1;
+            transform: translateX(-50%) translateY(-10px);
+        }
+        
+        /* Rename Dialog */
+        .rename-dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        .rename-dialog-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .rename-dialog {
+            background: rgba(30,30,40,0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 30px;
+            min-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+        .rename-dialog-overlay.active .rename-dialog {
+            transform: scale(1);
+        }
+        .rename-dialog h3 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .rename-dialog input {
+            width: 100%;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .rename-dialog input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .rename-dialog-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        .rename-dialog-actions button {
+            padding: 8px 20px;
+        }
+        .cancel-btn {
+            background: rgba(255,255,255,0.1);
+        }
+        .cancel-btn:hover {
+            background: rgba(255,255,255,0.2);
         }
         
         @media (max-width: 768px) { 
             .sidebar { width: 200px; } 
             .toolbar { flex-direction: column; }
             .font-controls { order: 1; }
+            .font-size-indicator { font-size: 12px; padding: 8px 18px; white-space: nowrap; }
+            .rename-dialog { min-width: 300px; margin: 20px; }
         }
     </style>
 </head>
@@ -195,12 +350,13 @@
                 <button id="saveBtn" class="btn-outline">💾 Save</button>
                 <button id="formatBtn">🎨 Format Code</button>
                 
-                <!-- Font Size Controls -->
+                <!-- Beautiful Font Size Controls -->
                 <div class="font-controls">
-                    <button id="fontDecreaseBtn" title="Decrease Font Size (Ctrl+-)">A-</button>
-                    <span class="font-size-value" id="fontSizeValue">15px</span>
-                    <button id="fontIncreaseBtn" title="Increase Font Size (Ctrl++)">A+</button>
-                    <button id="fontResetBtn" title="Reset Font Size">↺</button>
+                    <button id="fontDecreaseBtn" class="font-btn" title="Decrease Font Size (Ctrl+-)">−</button>
+                    <div class="font-size-display" id="fontSizeValue">15px</div>
+                    <button id="fontIncreaseBtn" class="font-btn" title="Increase Font Size (Ctrl++)">+</button>
+                    <div class="font-controls-divider"></div>
+                    <button id="fontResetBtn" class="font-btn font-reset-btn" title="Reset Font Size (Ctrl+0)">↺</button>
                 </div>
                 
                 <button id="downloadBtn">📥 Download</button>
@@ -222,7 +378,9 @@
 
         <div class="main-content">
             <div class="sidebar">
-                <div class="sidebar-header">📁 YOUR FILES</div>
+                <div class="sidebar-header">
+                    <span>📁 YOUR FILES</span>
+                </div>
                 <ul class="file-list" id="fileList"></ul>
             </div>
             <div class="editor-area">
@@ -242,16 +400,29 @@
         </div>
     </div>
     
-    <!-- Font Size Indicator -->
-    <div id="fontSizeIndicator" class="font-size-indicator">Font Size: 15px</div>
+    <!-- Beautiful Font Size Indicator -->
+    <div id="fontSizeIndicator" class="font-size-indicator">🔤 Font Size: 15px</div>
+    
+    <!-- Rename Dialog -->
+    <div id="renameDialog" class="rename-dialog-overlay">
+        <div class="rename-dialog">
+            <h3>✏️ Rename File</h3>
+            <input type="text" id="renameInput" placeholder="Enter new filename (with extension)" autocomplete="off">
+            <div class="rename-dialog-actions">
+                <button id="cancelRenameBtn" class="cancel-btn">Cancel</button>
+                <button id="confirmRenameBtn">Rename</button>
+            </div>
+        </div>
+    </div>
 
     <script>
-        let files = { 'untitled.txt': '// Welcome to CodeFlow Studio!\n// Click "Format Code" to beautify your code!\n// Use A+ / A- buttons to change font size\n\nfunction hello(){console.log("Hello World");const x=10;if(x>5){return true;}else{return false;}}' };
+        let files = { 'untitled.txt': '// Welcome to CodeFlow Studio!\n// Click "Format Code" to beautify your code!\n// Use the A+ / A- buttons to change font size\n// Or use keyboard shortcuts: Ctrl++ / Ctrl+-\n// Hover over files to see Rename option!\n\nfunction hello(){console.log("Hello World");const x=10;if(x>5){return true;}else{return false;}}' };
         let currentFile = 'untitled.txt';
         let editor = null;
         let currentFontSize = 15;
         const MIN_FONT_SIZE = 10;
         const MAX_FONT_SIZE = 32;
+        let fileToRename = null;
 
         const fileListEl = document.getElementById('fileList');
         const currentFileEl = document.getElementById('currentFile');
@@ -263,6 +434,8 @@
         const textarea = document.getElementById('editor');
         const fontSizeValueEl = document.getElementById('fontSizeValue');
         const fontSizeIndicator = document.getElementById('fontSizeIndicator');
+        const renameDialog = document.getElementById('renameDialog');
+        const renameInput = document.getElementById('renameInput');
 
         function initEditor() {
             editor = CodeMirror.fromTextArea(textarea, {
@@ -282,7 +455,6 @@
             });
             updateStats();
             
-            // Load saved font size from localStorage
             const savedFontSize = localStorage.getItem('codeflow_fontSize');
             if (savedFontSize) {
                 currentFontSize = parseInt(savedFontSize);
@@ -297,17 +469,13 @@
                 editorElement.style.fontSize = currentFontSize + 'px';
                 fontSizeValueEl.textContent = currentFontSize + 'px';
                 
-                // Show indicator
                 fontSizeIndicator.textContent = `🔤 Font Size: ${currentFontSize}px`;
                 fontSizeIndicator.classList.add('show');
                 setTimeout(() => {
                     fontSizeIndicator.classList.remove('show');
                 }, 1500);
                 
-                // Save to localStorage
                 localStorage.setItem('codeflow_fontSize', currentFontSize);
-                
-                // Also adjust line height proportionally
                 editorElement.style.lineHeight = (currentFontSize * 1.2) + 'px';
             }
         }
@@ -319,6 +487,8 @@
                 setStatus(`🔤 Font size increased to ${currentFontSize}px`);
             } else {
                 setStatus(`⚠️ Maximum font size (${MAX_FONT_SIZE}px) reached`);
+                fontSizeValueEl.style.transform = 'scale(1.1)';
+                setTimeout(() => fontSizeValueEl.style.transform = '', 200);
             }
         }
         
@@ -329,6 +499,8 @@
                 setStatus(`🔤 Font size decreased to ${currentFontSize}px`);
             } else {
                 setStatus(`⚠️ Minimum font size (${MIN_FONT_SIZE}px) reached`);
+                fontSizeValueEl.style.transform = 'scale(1.1)';
+                setTimeout(() => fontSizeValueEl.style.transform = '', 200);
             }
         }
         
@@ -336,6 +508,58 @@
             currentFontSize = 15;
             applyFontSize();
             setStatus(`🔤 Font size reset to ${currentFontSize}px`);
+            fontSizeValueEl.style.transform = 'scale(1.2)';
+            setTimeout(() => fontSizeValueEl.style.transform = '', 300);
+        }
+
+        // File Rename Functions
+        function openRenameDialog(fileName) {
+            fileToRename = fileName;
+            renameInput.value = fileName;
+            renameDialog.classList.add('active');
+            setTimeout(() => renameInput.focus(), 100);
+            renameInput.select();
+        }
+        
+        function closeRenameDialog() {
+            renameDialog.classList.remove('active');
+            fileToRename = null;
+        }
+        
+        function confirmRename() {
+            const newFileName = renameInput.value.trim();
+            if (!newFileName) {
+                setStatus('❌ Filename cannot be empty');
+                return;
+            }
+            
+            if (newFileName === fileToRename) {
+                closeRenameDialog();
+                return;
+            }
+            
+            if (files[newFileName]) {
+                setStatus('❌ A file with this name already exists');
+                renameInput.style.borderColor = '#ff4444';
+                setTimeout(() => renameInput.style.borderColor = '', 1000);
+                return;
+            }
+            
+            // Perform rename
+            const content = files[fileToRename];
+            delete files[fileToRename];
+            files[newFileName] = content;
+            
+            // Update current file if needed
+            if (currentFile === fileToRename) {
+                currentFile = newFileName;
+            }
+            
+            saveFiles();
+            renderFileList();
+            loadCurrentFile();
+            setStatus(`✏️ Renamed "${fileToRename}" → "${newFileName}"`);
+            closeRenameDialog();
         }
 
         // Format Code Function
@@ -489,39 +713,67 @@
             for (const fileName in files) {
                 const li = document.createElement('li');
                 if (fileName === currentFile) li.classList.add('active');
+                
                 const nameSpan = document.createElement('span');
                 nameSpan.className = 'file-name';
                 const ext = fileName.split('.').pop().toLowerCase();
                 const icons = { 'js': '🟨', 'html': '🌐', 'css': '🎨', 'py': '🐍', 'java': '☕', 'cpp': '⚙️', 'txt': '📄' };
                 nameSpan.innerHTML = `${icons[ext] || '📄'} ${fileName}`;
                 nameSpan.onclick = () => switchFile(fileName);
+                
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'file-actions';
+                
+                const renameBtn = document.createElement('button');
+                renameBtn.textContent = '✏️';
+                renameBtn.className = 'rename-file';
+                renameBtn.title = 'Rename';
+                renameBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    openRenameDialog(fileName);
+                };
+                
                 const delBtn = document.createElement('button');
                 delBtn.textContent = '×';
                 delBtn.className = 'delete-file';
-                delBtn.onclick = (e) => { e.stopPropagation(); deleteFile(fileName); };
+                delBtn.title = 'Delete';
+                delBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    deleteFile(fileName);
+                };
+                
+                actionsDiv.appendChild(renameBtn);
+                actionsDiv.appendChild(delBtn);
+                
                 li.appendChild(nameSpan);
-                li.appendChild(delBtn);
+                li.appendChild(actionsDiv);
                 fileListEl.appendChild(li);
             }
         }
 
-        // Keyboard shortcuts for font size
+        // Keyboard shortcuts
         function setupKeyboardShortcuts() {
             document.addEventListener('keydown', (e) => {
-                // Ctrl + + to increase font size
                 if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '=')) {
                     e.preventDefault();
                     increaseFontSize();
                 }
-                // Ctrl + - to decrease font size
                 else if ((e.ctrlKey || e.metaKey) && e.key === '-') {
                     e.preventDefault();
                     decreaseFontSize();
                 }
-                // Ctrl + 0 to reset font size
                 else if ((e.ctrlKey || e.metaKey) && e.key === '0') {
                     e.preventDefault();
                     resetFontSize();
+                }
+                else if (e.key === 'Escape' && renameDialog.classList.contains('active')) {
+                    closeRenameDialog();
+                }
+            });
+            
+            renameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    confirmRename();
                 }
             });
         }
@@ -532,8 +784,9 @@
         document.getElementById('clearBtn').addEventListener('click', clearEditor);
         document.getElementById('downloadBtn').addEventListener('click', downloadFile);
         document.getElementById('formatBtn').addEventListener('click', formatCode);
+        document.getElementById('cancelRenameBtn').addEventListener('click', closeRenameDialog);
+        document.getElementById('confirmRenameBtn').addEventListener('click', confirmRename);
         
-        // Font size button listeners
         document.getElementById('fontIncreaseBtn').addEventListener('click', increaseFontSize);
         document.getElementById('fontDecreaseBtn').addEventListener('click', decreaseFontSize);
         document.getElementById('fontResetBtn').addEventListener('click', resetFontSize);
