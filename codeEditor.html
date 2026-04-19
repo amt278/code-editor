@@ -64,7 +64,7 @@
         .logo { font-size: 1.8rem; animation: wave 2s ease-in-out infinite; }
         @keyframes wave { 0%,100% { transform: rotate(0deg); } 25% { transform: rotate(15deg); } 75% { transform: rotate(-15deg); } }
         .logo-text { font-size: 1.3rem; font-weight: bold; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .file-controls { display: flex; gap: 12px; flex-wrap: wrap; }
+        .file-controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
         button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -79,6 +79,30 @@
         button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4); }
         .btn-outline { background: transparent; border: 2px solid #667eea; color: #667eea; }
         .btn-outline:hover { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        
+        /* Font Size Controls */
+        .font-controls {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            background: rgba(255,255,255,0.1);
+            padding: 4px 12px;
+            border-radius: 50px;
+        }
+        .font-controls button {
+            padding: 4px 12px;
+            font-size: 16px;
+            font-weight: bold;
+            background: rgba(255,255,255,0.2);
+        }
+        .font-controls button:hover { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .font-size-value {
+            color: white;
+            font-size: 12px;
+            min-width: 45px;
+            text-align: center;
+        }
+        
         .status-area { display: flex; gap: 15px; align-items: center; }
         .language-selector {
             background: rgba(255,255,255,0.1);
@@ -125,12 +149,38 @@
         }
         .current-file-badge { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 4px 12px; border-radius: 50px; font-size: 11px; }
         .editor-stats { display: flex; gap: 20px; color: #858585; font-size: 12px; }
-        .CodeMirror { flex: 1; height: auto !important; background: rgba(20,20,30,0.4) !important; font-size: 15px; line-height: 1.6; }
+        .CodeMirror { flex: 1; height: auto !important; background: rgba(20,20,30,0.4) !important; font-size: 15px; line-height: 1.6; transition: font-size 0.2s ease; }
         .CodeMirror-gutters { background: rgba(20,20,30,0.6) !important; }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
         ::-webkit-scrollbar-thumb { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; }
-        @media (max-width: 768px) { .sidebar { width: 200px; } .toolbar { flex-direction: column; } }
+        
+        /* Font size indicator */
+        .font-size-indicator {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-family: monospace;
+        }
+        .font-size-indicator.show {
+            opacity: 1;
+        }
+        
+        @media (max-width: 768px) { 
+            .sidebar { width: 200px; } 
+            .toolbar { flex-direction: column; }
+            .font-controls { order: 1; }
+        }
     </style>
 </head>
 <body>
@@ -144,6 +194,15 @@
                 <button id="newFileBtn">✨ New File</button>
                 <button id="saveBtn" class="btn-outline">💾 Save</button>
                 <button id="formatBtn">🎨 Format Code</button>
+                
+                <!-- Font Size Controls -->
+                <div class="font-controls">
+                    <button id="fontDecreaseBtn" title="Decrease Font Size (Ctrl+-)">A-</button>
+                    <span class="font-size-value" id="fontSizeValue">15px</span>
+                    <button id="fontIncreaseBtn" title="Increase Font Size (Ctrl++)">A+</button>
+                    <button id="fontResetBtn" title="Reset Font Size">↺</button>
+                </div>
+                
                 <button id="downloadBtn">📥 Download</button>
                 <button id="clearBtn">🗑️ Clear</button>
             </div>
@@ -182,11 +241,17 @@
             </div>
         </div>
     </div>
+    
+    <!-- Font Size Indicator -->
+    <div id="fontSizeIndicator" class="font-size-indicator">Font Size: 15px</div>
 
     <script>
-        let files = { 'untitled.txt': '// Welcome to CodeFlow Studio!\n// Click "Format Code" to beautify your code!\n\nfunction hello(){console.log("Hello World");const x=10;if(x>5){return true;}else{return false;}}' };
+        let files = { 'untitled.txt': '// Welcome to CodeFlow Studio!\n// Click "Format Code" to beautify your code!\n// Use A+ / A- buttons to change font size\n\nfunction hello(){console.log("Hello World");const x=10;if(x>5){return true;}else{return false;}}' };
         let currentFile = 'untitled.txt';
         let editor = null;
+        let currentFontSize = 15;
+        const MIN_FONT_SIZE = 10;
+        const MAX_FONT_SIZE = 32;
 
         const fileListEl = document.getElementById('fileList');
         const currentFileEl = document.getElementById('currentFile');
@@ -196,6 +261,8 @@
         const wordCountEl = document.getElementById('wordCount');
         const languageSelect = document.getElementById('languageSelect');
         const textarea = document.getElementById('editor');
+        const fontSizeValueEl = document.getElementById('fontSizeValue');
+        const fontSizeIndicator = document.getElementById('fontSizeIndicator');
 
         function initEditor() {
             editor = CodeMirror.fromTextArea(textarea, {
@@ -214,9 +281,64 @@
                 saveCurrentFile();
             });
             updateStats();
+            
+            // Load saved font size from localStorage
+            const savedFontSize = localStorage.getItem('codeflow_fontSize');
+            if (savedFontSize) {
+                currentFontSize = parseInt(savedFontSize);
+                applyFontSize();
+            }
         }
 
-        // FORMAT CODE FUNCTION - WORKS!
+        // Font Size Functions
+        function applyFontSize() {
+            const editorElement = document.querySelector('.CodeMirror');
+            if (editorElement) {
+                editorElement.style.fontSize = currentFontSize + 'px';
+                fontSizeValueEl.textContent = currentFontSize + 'px';
+                
+                // Show indicator
+                fontSizeIndicator.textContent = `🔤 Font Size: ${currentFontSize}px`;
+                fontSizeIndicator.classList.add('show');
+                setTimeout(() => {
+                    fontSizeIndicator.classList.remove('show');
+                }, 1500);
+                
+                // Save to localStorage
+                localStorage.setItem('codeflow_fontSize', currentFontSize);
+                
+                // Also adjust line height proportionally
+                editorElement.style.lineHeight = (currentFontSize * 1.2) + 'px';
+            }
+        }
+        
+        function increaseFontSize() {
+            if (currentFontSize < MAX_FONT_SIZE) {
+                currentFontSize++;
+                applyFontSize();
+                setStatus(`🔤 Font size increased to ${currentFontSize}px`);
+            } else {
+                setStatus(`⚠️ Maximum font size (${MAX_FONT_SIZE}px) reached`);
+            }
+        }
+        
+        function decreaseFontSize() {
+            if (currentFontSize > MIN_FONT_SIZE) {
+                currentFontSize--;
+                applyFontSize();
+                setStatus(`🔤 Font size decreased to ${currentFontSize}px`);
+            } else {
+                setStatus(`⚠️ Minimum font size (${MIN_FONT_SIZE}px) reached`);
+            }
+        }
+        
+        function resetFontSize() {
+            currentFontSize = 15;
+            applyFontSize();
+            setStatus(`🔤 Font size reset to ${currentFontSize}px`);
+        }
+
+        // Format Code Function
         function formatCode() {
             const content = editor.getValue();
             const extension = currentFile.split('.').pop().toLowerCase();
@@ -383,16 +505,44 @@
             }
         }
 
+        // Keyboard shortcuts for font size
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                // Ctrl + + to increase font size
+                if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '=')) {
+                    e.preventDefault();
+                    increaseFontSize();
+                }
+                // Ctrl + - to decrease font size
+                else if ((e.ctrlKey || e.metaKey) && e.key === '-') {
+                    e.preventDefault();
+                    decreaseFontSize();
+                }
+                // Ctrl + 0 to reset font size
+                else if ((e.ctrlKey || e.metaKey) && e.key === '0') {
+                    e.preventDefault();
+                    resetFontSize();
+                }
+            });
+        }
+
         // Event Listeners
         document.getElementById('newFileBtn').addEventListener('click', newFile);
         document.getElementById('saveBtn').addEventListener('click', saveCurrentFile);
         document.getElementById('clearBtn').addEventListener('click', clearEditor);
         document.getElementById('downloadBtn').addEventListener('click', downloadFile);
         document.getElementById('formatBtn').addEventListener('click', formatCode);
+        
+        // Font size button listeners
+        document.getElementById('fontIncreaseBtn').addEventListener('click', increaseFontSize);
+        document.getElementById('fontDecreaseBtn').addEventListener('click', decreaseFontSize);
+        document.getElementById('fontResetBtn').addEventListener('click', resetFontSize);
+        
         languageSelect.addEventListener('change', (e) => changeLanguageMode(e.target.value));
 
         initEditor();
         loadFiles();
+        setupKeyboardShortcuts();
         window.addEventListener('beforeunload', () => saveCurrentFile());
     </script>
 </body>
