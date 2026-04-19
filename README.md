@@ -61,8 +61,8 @@
 ### Installation
 
 1. Clone the repository
-   git clone https://github.com/yourusername/codeflow-studio.git
-   cd codeflow-studio
+   git clone https://github.com/amt278/code-editor.git
+   cd codeflow-editor
 
 2. Install dependencies
    npm install express
@@ -75,7 +75,7 @@
 
 ## 📁 Project Structure
 
-codeflow-studio/
+code-editor/
 │
 ├── server.js              # Express server with API endpoints
 ├── index.html            # Modern landing page
