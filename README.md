@@ -94,12 +94,12 @@ code-editor/
 | Ctrl + N | Create new file |
 | Tab | Insert 4 spaces |
 
-## 🔧 API Endpoints
+<!-- ## 🔧 API Endpoints
 ``` http
 GET    /api/data     // Get all saved names
 POST   /api/data     // Add a new name
 DELETE /api/delete   // Remove a name
-```
+``` -->
 
 ## 🛠️ Built With
 
