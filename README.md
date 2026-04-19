@@ -3,7 +3,7 @@
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![Node](https://img.shields.io/badge/node-14+-green.svg)
 ![Express](https://img.shields.io/badge/express-4.x-lightgrey.svg)
-![License](https://img.shields.io/badge/license-MIT-purple.svg)
+<!-- ![License](https://img.shields.io/badge/license-MIT-purple.svg) -->
 
 > 🚀 A beautiful, modern, and feature-rich online code editor with syntax highlighting, multi-file support, and real-time auto-save.
 
@@ -108,9 +108,9 @@ DELETE /api/delete   // Remove a name
 - Node.js - JavaScript runtime
 - HTML5/CSS3 - Modern animations
 
-## 📝 License
+<!-- ## 📝 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License. -->
 
 ## 🙏 Acknowledgments
 
