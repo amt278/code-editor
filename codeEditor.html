@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeFlow - Modern Online Text Editor with Syntax Highlighting</title>
+    
+    <!-- CodeMirror CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
+    
+    <!-- CodeMirror JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    
+    <!-- CodeMirror Modes for different languages -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/java/java.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/php/php.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/ruby/ruby.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/go/go.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/markdown/markdown.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Monaco', 'Courier New', monospace;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated background particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Main container */
+        .editor-container {
+            position: relative;
+            z-index: 1;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: rgba(30, 30, 40, 0.95);
+            backdrop-filter: blur(20px);
+            margin: 20px;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Modern Toolbar */
+        .toolbar {
+            background: rgba(20, 20, 30, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            animation: wave 2s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        @keyframes wave {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(15deg); }
+            75% { transform: rotate(-15deg); }
+        }
+
+        .logo-text {
+            font-size: 1.3rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .file-controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+        }
+
+        .btn-outline:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .status-area {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .language-selector {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .language-selector:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .status {
+            color: #4ec9b0;
+            font-size: 12px;
+            padding: 5px 12px;
+            background: rgba(78, 201, 176, 0.1);
+            border-radius: 50px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Main content area */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Modern Sidebar */
+        .sidebar {
+            width: 280px;
+            background: rgba(20, 20, 30, 0.6);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-y: auto;
+            transition: all 0.3s;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            color: #fff;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+        }
+
+        .file-list {
+            list-style: none;
+            padding: 10px;
+        }
+
+        .file-list li {
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            color: #ccc;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 12px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: scaleY(0);
+            transition: transform 0.3s;
+        }
+
+        .file-list li:hover::before {
+            transform: scaleY(1);
+        }
+
+        .file-list li:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateX(5px);
+        }
+
+        .file-list li.active {
+            background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .file-list li.active::before {
+            transform: scaleY(1);
+        }
+
+        .file-name {
+            flex: 1;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-icon {
+            font-size: 18px;
+        }
+
+        .delete-file {
+            background: rgba(255, 68, 68, 0.2);
+            color: #ff6666;
+            padding: 4px 10px;
+            font-size: 16px;
+            border-radius: 8px;
+        }
+
+        .delete-file:hover {
+            background: #ff4444;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        /* Editor area */
+        .editor-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(30, 30, 40, 0.4);
+        }
+
+        .editor-header {
+            padding: 15px 25px;
+            background: rgba(20, 20, 30, 0.4);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .current-file {
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .current-file-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 11px;
+        }
+
+        .editor-stats {
+            display: flex;
+            gap: 20px;
+            color: #858585;
+            font-size: 12px;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* CodeMirror customization */
+        .CodeMirror {
+            flex: 1;
+            height: auto !important;
+            background: rgba(20, 20, 30, 0.4) !important;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .CodeMirror-gutters {
+            background: rgba(20, 20, 30, 0.6) !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+
+        .CodeMirror-linenumber {
+            color: #858585 !important;
+        }
+
+        .CodeMirror-cursor {
+            border-left-color: #667eea !important;
+        }
+
+        .CodeMirror-selected {
+            background: #667eea40 !important;
+        }
+
+        .CodeMirror-focused .CodeMirror-selected {
+            background: #667eea60 !important;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .editor-container {
+                margin: 10px;
+                border-radius: 20px;
+            }
+            
+            .sidebar {
+                width: 200px;
+            }
+            
+            .toolbar {
+                flex-direction: column;
+            }
+            
+            .file-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+
+    <div class="editor-container">
+        <div class="toolbar">
+            <div class="logo-area">
+                <span class="logo">✏️</span>
+                <span class="logo-text">CodeFlow Studio</span>
+            </div>
+            <div class="file-controls">
+                <button id="newFileBtn">✨ New File</button>
+                <button id="saveBtn" class="btn-outline">💾 Save</button>
+                <button id="downloadBtn">📥 Download</button>
+                <button id="clearBtn">🗑️ Clear</button>
+            </div>
+            <div class="status-area">
+                <select id="languageSelect" class="language-selector">
+                    <option value="javascript">🟨 JavaScript</option>
+                    <option value="html">🌐 HTML</option>
+                    <option value="css">🎨 CSS</option>
+                    <option value="python">🐍 Python</option>
+                    <option value="java">☕ Java</option>
+                    <option value="cpp">⚙️ C++</option>
+                    <option value="csharp">🔷 C#</option>
+                    <option value="php">🐘 PHP</option>
+                    <option value="ruby">💎 Ruby</option>
+                    <option value="go">🚀 Go</option>
+                    <option value="xml">📄 XML</option>
+                    <option value="markdown">📝 Markdown</option>
+                    <option value="plaintext">📝 Plain Text</option>
+                </select>
+                <div class="status" id="status">🚀 Ready to code</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="sidebar-header">📁 YOUR FILES</div>
+                <ul class="file-list" id="fileList">
+                    <li class="active" data-filename="untitled.txt">
+                        <span class="file-name">
+                            <span class="file-icon">📄</span>
+                            untitled.txt
+                        </span>
+                        <button class="delete-file" onclick="deleteFile('untitled.txt')">×</button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="editor-area">
+                <div class="editor-header">
+                    <div class="current-file">
+                        <span>📝 Currently editing</span>
+                        <span class="current-file-badge" id="currentFile">untitled.txt</span>
+                    </div>
+                    <div class="editor-stats">
+                        <div class="stat">
+                            <span>📊 Lines</span>
+                            <strong id="lineCount">1</strong>
+                        </div>
+                        <div class="stat">
+                            <span>📏 Characters</span>
+                            <strong id="charCount">0</strong>
+                        </div>
+                    </div>
+                </div>
+                <textarea id="editor" placeholder="Start typing your awesome code here... 🚀"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                const size = Math.random() * 5 + 2;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.animationDuration = `${Math.random() * 10 + 10}s`;
+                particle.style.animationDelay = `${Math.random() * 10}s`;
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Data structure to store files
+        let files = {
+            'untitled.txt': ''
+        };
+        let currentFile = 'untitled.txt';
+        let autoSaveTimer = null;
+        let editor = null;
+
+        // DOM elements
+        const fileListEl = document.getElementById('fileList');
+        const currentFileEl = document.getElementById('currentFile');
+        const statusEl = document.getElementById('status');
+        const lineCountEl = document.getElementById('lineCount');
+        const charCountEl = document.getElementById('charCount');
+        const languageSelect = document.getElementById('languageSelect');
+        const textarea = document.getElementById('editor');
+
+        // Initialize CodeMirror
+        function initEditor() {
+            editor = CodeMirror.fromTextArea(textarea, {
+                lineNumbers: true,
+                theme: 'dracula',
+                mode: 'javascript',
+                autoCloseTags: true,
+                autoCloseBrackets: true,
+                matchBrackets: true,
+                indentUnit: 4,
+                tabSize: 4,
+                lineWrapping: true,
+                extraKeys: {
+                    "Ctrl-S": function(cm) {
+                        saveCurrentFile();
+                    },
+                    "Ctrl-N": function(cm) {
+                        newFile();
+                    },
+                    "Tab": function(cm) {
+                        cm.replaceSelection("    ");
+                    }
+                }
+            });
+            
+            // Update stats when content changes
+            editor.on('change', () => {
+                updateStats();
+                if (autoSaveTimer) clearTimeout(autoSaveTimer);
+                autoSaveTimer = setTimeout(() => {
+                    saveCurrentFile();
+                    setStatus('💾 Auto-saved');
+                }, 2000);
+            });
+            
+            updateStats();
+        }
+
+        // Change syntax highlighting mode
+        function changeLanguageMode(language) {
+            let mode = 'text/plain';
+            switch(language) {
+                case 'javascript': mode = 'javascript'; break;
+                case 'html': mode = 'htmlmixed'; break;
+                case 'css': mode = 'css'; break;
+                case 'python': mode = 'python'; break;
+                case 'java': mode = 'text/x-java'; break;
+                case 'cpp': mode = 'text/x-c++src'; break;
+                case 'csharp': mode = 'text/x-csharp'; break;
+                case 'php': mode = 'php'; break;
+                case 'ruby': mode = 'ruby'; break;
+                case 'go': mode = 'go'; break;
+                case 'xml': mode = 'xml'; break;
+                case 'markdown': mode = 'markdown'; break;
+                default: mode = 'text/plain';
+            }
+            editor.setOption('mode', mode);
+        }
+
+        // Load files from localStorage
+        function loadFiles() {
+            const saved = localStorage.getItem('codeflow_files');
+            if (saved) {
+                files = JSON.parse(saved);
+                if (Object.keys(files).length === 0) {
+                    files = { 'untitled.txt': '' };
+                }
+                currentFile = Object.keys(files)[0];
+            }
+            renderFileList();
+            loadCurrentFile();
+        }
+
+        // Save files to localStorage
+        function saveFiles() {
+            localStorage.setItem('codeflow_files', JSON.stringify(files));
+        }
+
+        // Load current file content into editor
+        function loadCurrentFile() {
+            if (editor) {
+                editor.setValue(files[currentFile] || '');
+                currentFileEl.textContent = currentFile;
+                updateStats();
+                updateLanguageFromExtension();
+                setStatus(`✨ Loaded ${currentFile}`);
+            }
+        }
+
+        // Save current file content
+        function saveCurrentFile() {
+            if (editor) {
+                files[currentFile] = editor.getValue();
+                saveFiles();
+                setStatus(`💾 Saved ${currentFile}`);
+                renderFileList();
+            }
+        }
+
+        // Create new file
+        function newFile() {
+            let fileName = prompt('🎨 Name your new file (with extension):', 'awesome-code.js');
+            if (fileName) {
+                if (files[fileName]) {
+                    alert('⚠️ File already exists! Try another name.');
+                    return;
+                }
+                files[fileName] = '';
+                currentFile = fileName;
+                saveFiles();
+                loadCurrentFile();
+                renderFileList();
+                updateLanguageFromExtension();
+                setStatus(`✨ Created new file: ${fileName}`);
+            }
+        }
+
+        // Delete file
+        function deleteFile(fileName) {
+            if (confirm(`🗑️ Delete "${fileName}"? This action cannot be undone.`)) {
+                delete files[fileName];
+                if (Object.keys(files).length === 0) {
+                    files = { 'untitled.txt': '' };
+                }
+                if (currentFile === fileName) {
+                    currentFile = Object.keys(files)[0];
+                }
+                saveFiles();
+                renderFileList();
+                loadCurrentFile();
+                setStatus(`🗑️ Deleted ${fileName}`);
+            }
+        }
+
+        // Switch to different file
+        function switchFile(fileName) {
+            saveCurrentFile();
+            currentFile = fileName;
+            loadCurrentFile();
+            renderFileList();
+            updateLanguageFromExtension();
+        }
+
+        // Clear editor
+        function clearEditor() {
+            if (confirm('🧹 Clear all content in current file?')) {
+                editor.setValue('');
+                saveCurrentFile();
+                updateStats();
+                setStatus('🧹 Editor cleared');
+            }
+        }
+
+        // Download current file
+        function downloadFile() {
+            const content = editor.getValue();
+            const blob = new Blob([content], { type: 'text/plain' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.href = url;
+            link.download = currentFile;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            setStatus(`📥 Downloaded ${currentFile}`);
+        }
+
+        // Update stats (lines and characters)
+        function updateStats() {
+            if (editor) {
+                const content = editor.getValue();
+                const lines = content.split('\n').length;
+                const chars = content.length;
+                lineCountEl.textContent = lines;
+                charCountEl.textContent = chars;
+            }
+        }
+
+        // Update language based on file extension
+        function updateLanguageFromExtension() {
+            const extension = currentFile.split('.').pop().toLowerCase();
+            const languageMap = {
+                'js': 'javascript',
+                'html': 'html',
+                'css': 'css',
+                'py': 'python',
+                'java': 'java',
+                'cpp': 'cpp',
+                'c': 'cpp',
+                'cs': 'csharp',
+                'php': 'php',
+                'rb': 'ruby',
+                'go': 'go',
+                'json': 'javascript',
+                'xml': 'xml',
+                'md': 'markdown',
+                'txt': 'plaintext'
+            };
+            const language = languageMap[extension] || 'plaintext';
+            languageSelect.value = language;
+            changeLanguageMode(language);
+        }
+
+        // Set status message
+        function setStatus(message) {
+            statusEl.textContent = message;
+            statusEl.style.animation = 'none';
+            setTimeout(() => {
+                statusEl.style.animation = 'pulse 2s infinite';
+            }, 10);
+            setTimeout(() => {
+                if (statusEl.textContent === message) {
+                    statusEl.textContent = '🚀 Ready to code';
+                }
+            }, 2000);
+        }
+
+        // Render file list in sidebar
+        function renderFileList() {
+            fileListEl.innerHTML = '';
+            for (const fileName in files) {
+                const li = document.createElement('li');
+                if (fileName === currentFile) {
+                    li.classList.add('active');
+                }
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'file-name';
+                
+                const fileIcon = document.createElement('span');
+                fileIcon.className = 'file-icon';
+                const ext = fileName.split('.').pop().toLowerCase();
+                const icons = {
+                    'js': '🟨', 'html': '🌐', 'css': '🎨', 'py': '🐍',
+                    'java': '☕', 'cpp': '⚙️', 'txt': '📄', 'json': '📦',
+                    'md': '📝', 'xml': '📄', 'php': '🐘', 'rb': '💎',
+                    'go': '🚀', 'cs': '🔷'
+                };
+                fileIcon.textContent = icons[ext] || '📄';
+                
+                const nameText = document.createTextNode(fileName);
+                nameSpan.appendChild(fileIcon);
+                nameSpan.appendChild(nameText);
+                nameSpan.onclick = () => switchFile(fileName);
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = '×';
+                deleteBtn.className = 'delete-file';
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    deleteFile(fileName);
+                };
+                
+                li.appendChild(nameSpan);
+                li.appendChild(deleteBtn);
+                fileListEl.appendChild(li);
+            }
+        }
+
+        // Event listeners
+        document.getElementById('newFileBtn').addEventListener('click', newFile);
+        document.getElementById('saveBtn').addEventListener('click', saveCurrentFile);
+        document.getElementById('clearBtn').addEventListener('click', clearEditor);
+        document.getElementById('downloadBtn').addEventListener('click', downloadFile);
+        languageSelect.addEventListener('change', (e) => {
+            changeLanguageMode(e.target.value);
+            setStatus(`🎨 Switched to ${e.target.options[e.target.selectedIndex].text} highlighting`);
+        });
+
+        // Initialize
+        createParticles();
+        initEditor();
+        loadFiles();
+        
+        window.addEventListener('beforeunload', () => {
+            saveCurrentFile();
+        });
+    </script>
+</body>
+</html>
