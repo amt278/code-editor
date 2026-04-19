@@ -62,7 +62,7 @@
 
 1. Clone the repository
    git clone https://github.com/amt278/code-editor.git
-   cd codeflow-editor
+   cd code-editor
 
 2. Install dependencies
    npm install express
