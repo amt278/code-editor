@@ -74,7 +74,7 @@
    http://localhost:3000
 
 ## 📁 Project Structure
-
+``` bash
 code-editor/
 │
 ├── server.js              # Express server with API endpoints
@@ -82,6 +82,7 @@ code-editor/
 ├── editor.html           # Full-featured code editor
 ├── package.json          # Project dependencies
 └── README.md            # Documentation
+```
 
 ## 🎮 Usage Guide
 
@@ -94,10 +95,11 @@ code-editor/
 | Tab | Insert 4 spaces |
 
 ## 🔧 API Endpoints
-
+``` http
 GET    /api/data     // Get all saved names
 POST   /api/data     // Add a new name
 DELETE /api/delete   // Remove a name
+```
 
 ## 🛠️ Built With
 
